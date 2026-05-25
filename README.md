@@ -16,3 +16,10 @@ This repository contains patched versions of the official robocup_demo with cust
 
 - This is a community patch, not the official release.
 - For the original unmodified source, visit [BoosterRobotics/robocup_demo](https://github.com/BoosterRobotics/robocup_demo).
+
+## Model Engines
+
+Starting from v1.1, TensorRT model engines (.engine files) are **not included** in the source folder.
+They are available in the [engines/](engines/) directory reference or can be downloaded from the [v1.1 release](https://github.com/Unknownuserfrommars/booster-patch/releases/tag/v1.1) as part of Patch_1.1.zip.
+
+To use: copy the .engine files from the release zip to Patch_1.1/src/vision/model/ before building.
