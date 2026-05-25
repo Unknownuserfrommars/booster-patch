@@ -1,10 +1,10 @@
 # booster-patch
 
-**Unofficial patch archive for the RoboCup booster robot.**
+**Unofficial patch archive for the Booster Robotics robocup_demo.**
 
-Original source: [booster.tech](https://booster.tech) / [booster-tech/robocup-demo](https://github.com/booster-tech/robocup-demo)
+Original source: [BoosterRobotics/robocup_demo](https://github.com/BoosterRobotics/robocup_demo) — The official Booster T1 and K1 RoboCup demo.
 
-This repository contains patched versions of the official robocup-demo, with custom modifications for competition use.
+This repository contains patched versions of the official robocup_demo with custom modifications for competition use. Not affiliated with Booster Robotics.
 
 ## Versions
 
@@ -14,5 +14,5 @@ This repository contains patched versions of the official robocup-demo, with cus
 
 ## Notes
 
-- This is a community patch, not affiliated with booster.tech.
-- For the original unmodified source, visit the [official repo](https://github.com/booster-tech/robocup-demo).
+- This is a community patch, not the official release.
+- For the original unmodified source, visit [BoosterRobotics/robocup_demo](https://github.com/BoosterRobotics/robocup_demo).
