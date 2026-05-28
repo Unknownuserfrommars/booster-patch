@@ -12,6 +12,7 @@ This repository contains patched versions of the official robocup_demo with cust
 |---|---|---|
 | v1.0 | Original patch by Kevin Zhou | [Patch_1.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.0/Patch_1.0.zip) |
 | v1.1 | Updated Patch | [Patch_1.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.1/Patch_1.1.zip) |
+| v1.2.4 | Updated Striker Defense & Bugfixes | [Patch_1.2.4.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.2.4/Patch_1.2.4.zip) |
 
 ## Notes
 
