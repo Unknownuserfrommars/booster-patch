@@ -18,6 +18,7 @@ This repository contains patched versions of the official robocup_demo with cust
 
 - This is a community patch, not the official release.
 - For the original unmodified source, visit [BoosterRobotics/robocup_demo](https://github.com/BoosterRobotics/robocup_demo).
+- NOTE: The original source may be updated & modified at any time. The v1.x series uses the demo which can be found [here](https://github.com/dycnnnb/robot).
 
 ## Model Engines
 
