@@ -23,7 +23,7 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 
 ## Model Engines
 
-Starting from v1.1, TensorRT model engines (.engine files) are **not included** in the source folder.
-They are available in the [engines/](engines/) directory reference or can be downloaded from the [v1.1 release](https://github.com/Unknownuserfrommars/booster-patch/releases/tag/v1.1) as part of Patch_1.1.zip.
+TensorRT model engines (.engine files) are **not included** in the source folder.
+They are available in the [engines/](engines/) directory reference or can be downloaded from the [release zip](https://github.com/Unknownuserfrommars/booster-patch/releases) as part of the `Patch_1.x.y.zip`.
 
-To use: copy the .engine files from the release zip to Patch_1.1/src/vision/model/ before building.
+To use: copy the .engine files from the release zip to the corresponding `Patch_1.x.y/src/vision/model/` before building.
