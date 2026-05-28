@@ -10,7 +10,7 @@ This repository contains patched versions of the official robocup_demo with cust
 It is generally recommended to download the latest bugfix release for each `1.x` version series, meaning the version with the highest `y` in `1.x.y`, to minimize known bugs.
 
 | Version | Description | Download | Recommended Ver. |
-|---|---|---|---|
+|---|---|---|:-:|
 | v1.0 | Original patch by Kevin Zhou | [Patch_1.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.0/Patch_1.0.zip) | |
 | v1.1 | Updated Quick Shot, Power Shot, Deflection Shot | [Patch_1.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.1/Patch_1.1.zip) | |
 | v1.2.4 | Updated Striker Defense & Bugfixes | [Patch_1.2.4.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.2.4/Patch_1.2.4.zip) | ⭐ |
