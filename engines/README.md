@@ -13,5 +13,5 @@ as release assets or can be compiled from source.
 
 ## Usage
 
-Copy the .engine files to Patch_1.1/src/vision/model/ before building.
-Or download Patch_1.1.zip from the release which includes them.
+Copy the .engine files to `Patch_1.x/src/vision/model/` before building.
+Or download the full Patch zip from the release which includes them.
