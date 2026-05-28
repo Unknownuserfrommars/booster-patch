@@ -1,4 +1,4 @@
-# Patch v1.2.2 — Tutorial: Using New Features
+# Patch v1.2.3 — Tutorial: Using New Features
 
 ## Enabling Features
 
