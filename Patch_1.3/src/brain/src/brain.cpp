@@ -143,6 +143,17 @@ Brain::Brain() : rclcpp::Node("brain_node")
     declare_parameter("strategy.possession_margin", 0.25);
     declare_parameter("strategy.possession_hysteresis_secs", 0.3);
     declare_parameter("strategy.attack_protection_dist", 0.5);
+
+    // v1.3 Goalie overhaul
+    declare_parameter<bool>("goalie.shot.enable", true);
+    declare_parameter<double>("goalie.shot.velocity_threshold", 0.3);
+    declare_parameter<double>("goalie.shot.reaction_time_window", 1.5);
+    declare_parameter<double>("goalie.save.squat_block_msecs", 500.0);
+    declare_parameter<double>("goalie.save.block_hold_msecs", 1500.0);
+    declare_parameter<double>("goalie.save.crab_speed", 1.0);
+    declare_parameter<bool>("goalie.clear.enable_quick_clear", true);
+    declare_parameter<double>("goalie.clear.clear_power", 6.0);
+    declare_parameter<bool>("goalie.position.enable_trajectory_predict", true);
 }
 
 Brain::~Brain()

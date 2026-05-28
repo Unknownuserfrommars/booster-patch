@@ -69,6 +69,11 @@ void BrainTree::init()
     REGISTER_BUILDER(Intercept)
     REGISTER_BUILDER(RoleSwitchIfNeeded)
     REGISTER_BUILDER(Assist)
+    // v1.3 Goalie overhaul
+    REGISTER_BUILDER(ShotDetector)
+    REGISTER_BUILDER(DivingSave)
+    REGISTER_BUILDER(QuickClear)
+    REGISTER_BUILDER(ImprovedGoaliePosition)
     // Action Nodes for debug
     REGISTER_BUILDER(CrabWalk)
     REGISTER_BUILDER(AutoCalibrateVision)
@@ -3393,5 +3398,348 @@ NodeStatus Speak::tick()
     getInput("text", text);
     if (text == lastText) return NodeStatus::SUCCESS;
     brain->speak(text, false);
+    return NodeStatus::SUCCESS;
+}
+
+// ═══════════════════════════════════════════════════════════
+// v1.3 Goalie Overhaul — ShotDetector, DivingSave, QuickClear, ImprovedGoaliePosition
+// ═══════════════════════════════════════════════════════════
+
+void ShotDetector::computeBallVelocity(double &vx, double &vy)
+{
+    vx = 0.0; vy = 0.0;
+    auto now = brain->get_clock()->now();
+    double dt = brain->msecsSince(_lastBallTime) / 1000.0;
+    if (!_hasLastBall || dt < 0.001 || dt > 1.0) {
+        _lastBallX = brain->data->ball.posToField.x;
+        _lastBallY = brain->data->ball.posToField.y;
+        _lastBallTime = now;
+        _hasLastBall = true;
+        return;
+    }
+    vx = (brain->data->ball.posToField.x - _lastBallX) / dt;
+    vy = (brain->data->ball.posToField.y - _lastBallY) / dt;
+    _lastBallX = brain->data->ball.posToField.x;
+    _lastBallY = brain->data->ball.posToField.y;
+    _lastBallTime = now;
+}
+
+NodeStatus ShotDetector::tick()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/ShotDetector", rerun::TextLog(msg));
+    };
+
+    setOutput("shot_detected", false);
+    setOutput("shot_direction", string("center"));
+    setOutput("shot_intercept_y", 0.0);
+    setOutput("shot_time_to_impact", 999.0);
+
+    if (!brain->data->ballDetected) return NodeStatus::SUCCESS;
+
+    auto fd = brain->config->fieldDimensions;
+    auto ball = brain->data->ball;
+    double ownGoalX = -fd.length / 2.0;
+    double goalHalfWidth = fd.goalWidth / 2.0;
+
+    // Compute ball velocity
+    double ballVx, ballVy;
+    computeBallVelocity(ballVx, ballVy);
+
+    // Check if ball is moving toward our goal
+    bool movingTowardGoal = ballVx < -0.3;
+    if (!movingTowardGoal) {
+        log(format("ball moving away (vx=%.2f)", ballVx));
+        return NodeStatus::SUCCESS;
+    }
+
+    // Predict goal-line intercept
+    double distToGoalX = ball.posToField.x - ownGoalX;
+    if (distToGoalX < 0.1) {
+        log("ball already past goal line");
+        return NodeStatus::SUCCESS;
+    }
+
+    double timeToGoal = distToGoalX / fabs(ballVx);
+    double interceptY = ball.posToField.y + ballVy * timeToGoal;
+
+    bool inGoal = fabs(interceptY) < goalHalfWidth + 1.0;  // 1.0m margin
+    bool inTime = timeToGoal < 1.5;  // 1.5 second reaction window
+
+    if (inGoal && inTime) {
+        setOutput("shot_detected", true);
+        setOutput("shot_time_to_impact", timeToGoal);
+
+        // Determine save side
+        double goalieY = brain->data->robotPoseToField.y;
+        double lateralDist = interceptY - goalieY;
+        if (fabs(lateralDist) < 0.2)
+            setOutput("shot_direction", string("center"));
+        else if (lateralDist > 0)
+            setOutput("shot_direction", string("left"));
+        else
+            setOutput("shot_direction", string("right"));
+
+        setOutput("shot_intercept_y", interceptY);
+
+        log(format("SHOT DETECTED! vx=%.2f vy=%.2f intercept=%.2f tti=%.2f dir=%s",
+            ballVx, ballVy, interceptY, timeToGoal,
+            lateralDist > 0.2 ? "left" : (lateralDist < -0.2 ? "right" : "center")));
+
+        brain->log->setTimeNow();
+        brain->log->logToScreen("goalie/shot",
+            format("SHOT! intercept=%.2f tti=%.1fs", interceptY, timeToGoal),
+            0xFF0000FF, 2.0);
+    }
+
+    return NodeStatus::SUCCESS;
+}
+
+NodeStatus DivingSave::onStart()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/DivingSave", rerun::TextLog(msg));
+    };
+
+    getInput("direction", _direction);
+    getInput("intercept_y", _interceptY);
+    getInput("time_to_impact", _timeToImpact);
+    if (_timeToImpact < 0.2) _timeToImpact = 0.2;
+
+    _phase = "approach";
+    _phaseStartTime = brain->get_clock()->now();
+
+    log(format("onStart: dir=%s interceptY=%.2f tti=%.2f",
+        _direction.c_str(), _interceptY, _timeToImpact));
+    brain->speak("saving", true);
+
+    return NodeStatus::RUNNING;
+}
+
+NodeStatus DivingSave::onRunning()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/DivingSave", rerun::TextLog(msg));
+    };
+
+    double goalieY = brain->data->robotPoseToField.y;
+    double lateralDist = _interceptY - goalieY;
+
+    if (_phase == "approach") {
+        // Phase 1: Lateral movement toward intercept point
+        if (fabs(lateralDist) < 0.2 || _direction == "center") {
+            _phase = "block";
+            _phaseStartTime = brain->get_clock()->now();
+            log("approach done, entering block");
+        } else {
+            double dir = lateralDist > 0 ? M_PI / 2.0 : -M_PI / 2.0;
+            double speed = min(1.0, fabs(lateralDist) / _timeToImpact);
+            speed = max(speed, 0.3);
+            brain->client->crabWalk(dir, speed);
+            log(format("approach: latDist=%.2f crabDir=%.2f speed=%.2f",
+                lateralDist, dir, speed));
+        }
+        return NodeStatus::RUNNING;
+    }
+
+    if (_phase == "block") {
+        // Phase 2: Execute directional squat block
+        brain->client->squatBlock(_direction);
+        double blockMsecs = 500.0;
+        brain->get_parameter("goalie.save.squat_block_msecs", blockMsecs);
+        if (brain->msecsSince(_phaseStartTime) > blockMsecs) {
+            _phase = "hold";
+            _phaseStartTime = brain->get_clock()->now();
+            log("block executed, holding");
+        }
+        return NodeStatus::RUNNING;
+    }
+
+    if (_phase == "hold") {
+        // Phase 3: Hold block position
+        double holdMsecs = 1500.0;
+        brain->get_parameter("goalie.save.block_hold_msecs", holdMsecs);
+
+        // Check if threat is over
+        bool ballPastGoal = brain->data->ball.posToField.x < -brain->config->fieldDimensions.length / 2.0 + 0.5;
+        bool ballStopped = brain->msecsSince(brain->data->ball.timePoint) > 500;
+        bool timedOut = brain->msecsSince(_phaseStartTime) > holdMsecs;
+
+        // Check if ball is still a threat
+        double ballVx, ballVy;
+        // reuse velocity tracking — if ball changed direction, threat is over
+        bool threatOver = ballPastGoal || ballStopped;
+
+        if (threatOver || timedOut) {
+            log(format("hold done: pastGoal=%d stopped=%d timeout=%d",
+                ballPastGoal, ballStopped, timedOut));
+            brain->client->squatUp();
+            brain->tree->setEntry<bool>("shot_detected", false);
+            return NodeStatus::SUCCESS;
+        }
+        return NodeStatus::RUNNING;
+    }
+
+    return NodeStatus::SUCCESS;
+}
+
+void DivingSave::onHalted()
+{
+    brain->client->squatUp();
+    brain->tree->setEntry<bool>("shot_detected", false);
+}
+
+NodeStatus QuickClear::onStart()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/QuickClear", rerun::TextLog(msg));
+    };
+    log("QuickClear onStart");
+    _startTime = brain->get_clock()->now();
+    _hasKicked = false;
+    return NodeStatus::RUNNING;
+}
+
+NodeStatus QuickClear::onRunning()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/QuickClear", rerun::TextLog(msg));
+    };
+
+    double elapsedMs = brain->msecsSince(_startTime);
+
+    // Timeout: give up after 5 seconds
+    if (elapsedMs > 5000.0) {
+        log("QuickClear timeout");
+        return NodeStatus::SUCCESS;
+    }
+
+    // If we already kicked, check if ball is gone
+    if (_hasKicked) {
+        if (!brain->data->ballDetected || brain->data->ball.range > 2.0) {
+            log("ball cleared, done");
+            return NodeStatus::SUCCESS;
+        }
+        // Ball still near, try again
+        _hasKicked = false;
+    }
+
+    // Look for the ball if not visible
+    if (!brain->data->ballDetected) {
+        // Quick head scan
+        brain->client->moveHead(0.4, 0.0);
+        log("looking for ball");
+        return NodeStatus::RUNNING;
+    }
+
+    auto ball = brain->data->ball;
+
+    // If ball is in kick range, clear it
+    if (ball.range < 0.8) {
+        double clearPower = 6.0;
+        brain->get_parameter("goalie.clear.clear_power", clearPower);
+        double clearDir = brain->calcClearDir();
+        brain->data->kickSubType = 4;  // clearance kick
+        brain->client->kickBall(clearPower, clearDir);
+        _hasKicked = true;
+        log(format("clear kick: power=%.1f dir=%.2f", clearPower, clearDir));
+        return NodeStatus::RUNNING;
+    }
+
+    // Chase ball to get in kick range
+    if (ball.range < 3.0) {
+        double speed = min(0.8, ball.range);
+        brain->client->setVelocity(
+            speed * cos(ball.yawToRobot),
+            speed * sin(ball.yawToRobot),
+            0, false, false, false
+        );
+        log(format("chasing ball to clear: range=%.1f", ball.range));
+        return NodeStatus::RUNNING;
+    }
+
+    // Ball too far, done
+    log("ball too far to clear");
+    return NodeStatus::SUCCESS;
+}
+
+void QuickClear::onHalted()
+{
+    brain->client->setVelocity(0, 0, 0);
+}
+
+double ImprovedGoaliePosition::calcTrajectoryY()
+{
+    auto ball = brain->data->ball;
+    auto fd = brain->config->fieldDimensions;
+    double ownGoalX = -fd.length / 2.0;
+    double distToGoalline = 1.0;
+    getInput("dist_to_goalline", distToGoalline);
+
+    // Use ball predictor data if available
+    if (brain->data->ballWillBreach && brain->data->ballBreachPoint.x < ownGoalX + distToGoalline) {
+        return brain->data->ballBreachPoint.y;
+    }
+
+    // Fallback: linear projection (old behavior)
+    double ballX = ball.posToField.x;
+    double ballY = ball.posToField.y;
+    double denom = ballX - ownGoalX;
+    if (fabs(denom) < 0.01) return ballY;
+    return ballY * distToGoalline / denom;
+}
+
+NodeStatus ImprovedGoaliePosition::tick()
+{
+    auto log = [=](string msg) {
+        brain->log->setTimeNow();
+        brain->log->log("debug/ImprovedGoaliePosition", rerun::TextLog(msg));
+    };
+
+    if (!brain->tree->getEntry<bool>("ball_location_known")) {
+        brain->client->setVelocity(0, 0, 0);
+        return NodeStatus::SUCCESS;
+    }
+
+    double distTolerance = getInput<double>("dist_tolerance").value();
+    double thetaTolerance = getInput<double>("theta_tolerance").value();
+    double distToGoalline = getInput<double>("dist_to_goalline").value();
+    double vxLimit = getInput<double>("vx_limit").value();
+    double vyLimit = getInput<double>("vy_limit").value();
+
+    auto fd = brain->config->fieldDimensions;
+    auto ballPos = brain->data->ball.posToField;
+    auto robotPose = brain->data->robotPoseToField;
+    double ownGoalX = -fd.length / 2.0;
+
+    Pose2D targetPose;
+    targetPose.x = ownGoalX + distToGoalline;
+
+    // Use trajectory-aware Y calculation
+    targetPose.y = calcTrajectoryY();
+    targetPose.y = cap(targetPose.y, fd.goalWidth / 2.0, -fd.goalWidth / 2.0);
+    targetPose.theta = atan2(ballPos.y - targetPose.y, ballPos.x - targetPose.x);
+
+    double dist = norm(targetPose.x - robotPose.x, targetPose.y - robotPose.y);
+
+    if (dist < distTolerance && fabs(brain->data->ball.yawToRobot) < thetaTolerance) {
+        brain->client->setVelocity(0, 0, 0);
+        return NodeStatus::SUCCESS;
+    }
+
+    auto targetPose_r = brain->data->field2robot(targetPose);
+    double vx = targetPose_r.x;
+    double vy = targetPose_r.y;
+    double vtheta = brain->data->ball.yawToRobot * 2.0;
+
+    vx = cap(vx, vxLimit, -vxLimit);
+    vy = cap(vy, vyLimit, -vyLimit);
+
+    brain->client->setVelocity(vx, vy, vtheta, false, false, false);
     return NodeStatus::SUCCESS;
 }

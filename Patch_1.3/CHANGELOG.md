@@ -1,4 +1,30 @@
-# Patch v1.2.2 — CHANGELOG
+# Patch v1.3 — CHANGELOG
+
+## v1.3 — Goalie Overhaul: Shot Detection & Diving Saves (2026-05-28)
+
+**New nodes for goalie:**
+- **`ShotDetector`** — monitors ball velocity, predicts goal-line intercept, flags incoming shots
+- **`DivingSave`** — three-phase save: lateral crabWalk approach → directional squatBlock → hold position
+- **`QuickClear`** — after a save: stand up, find ball, kick to sideline in one rapid sequence
+- **`ImprovedGoaliePosition`** — velocity-aware trajectory projection replaces static linear interpolation
+
+**Tree changes:**
+- `subtree_goal_keeper_play.xml` rewritten with shot detection pipeline
+- Shot detection runs at high priority — when a shot is detected, it interrupts normal goalie behavior
+- Pipeline: `ShotDetector` → `DivingSave` → `QuickClear` → resume normal play
+
+**New config params (all under `strategy.goalie`):**
+- `shot.enable`, `shot.velocity_threshold`, `shot.reaction_time_window`
+- `save.squat_block_msecs`, `save.block_hold_msecs`, `save.crab_speed`
+- `clear.enable_quick_clear`, `clear.clear_power`
+- `position.enable_trajectory_predict`
+
+**Bug fixes carried from v1.2.4:**
+- Fixed crash: removed broken `<Script code=" brain->data->kickSubType = 1; ">` node in freekick XML
+- Fixed duplicate Kick sequence in `subtree_striker_freekick.xml`
+- Moved kickSubType=1 logic to C++ `handleSpecialStates()`
+
+---
 
 ## v1.2.2 — Code Cleanup & Defense Restructure (2026-05-28)
 

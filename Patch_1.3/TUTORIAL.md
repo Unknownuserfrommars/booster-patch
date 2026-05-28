@@ -1,3 +1,108 @@
+# Patch v1.3 — Tutorial
+
+## v1.3 Goalie Overhaul: Shot Detection & Diving Saves
+
+### What's New
+
+The goalie now has a **three-stage save pipeline**:
+1. **ShotDetector** — continuously monitors ball velocity. When a shot is detected heading toward goal, it flags `shot_detected=true` on the blackboard.
+2. **DivingSave** — interrupts whatever the goalie was doing and executes a three-phase save:
+   - **Approach**: crabWalk laterally toward the predicted intercept point
+   - **Block**: directional squatBlock (left/right/center) to cover the shot
+   - **Hold**: maintain block position until threat passes
+3. **QuickClear** — after a save, stands up, finds the ball, and kicks it to the sideline.
+4. **ImprovedGoaliePosition** — uses ball velocity for trajectory prediction (replaces old static linear projection).
+
+### New Config Parameters
+
+```yaml
+strategy:
+  goalie:
+    shot:
+      enable: true                    # Master switch for shot detection
+      velocity_threshold: 0.3         # m/s toward own goal to trigger
+      reaction_time_window: 1.5      # seconds ahead to predict
+    save:
+      squat_block_msecs: 500.0       # Time for squat block execution
+      block_hold_msecs: 1500.0       # Max hold duration after block
+      crab_speed: 1.0                # Lateral dive speed (m/s)
+    clear:
+      enable_quick_clear: true       # Kick ball after save
+      clear_power: 6.0               # Clearance kick power
+    position:
+      enable_trajectory_predict: true  # Use velocity for positioning
+```
+
+### How It Works
+
+The shot detection runs at **high priority** in the behavior tree:
+
+```
+GoalKeeperPlay tick:
+  ├── Locate + SelfLocate (always)
+  ├── ShotDetector (runs every tick, monitors ball)
+  │
+  ├── [IF shot_detected=true]  ← HIGH PRIORITY, interrupts everything
+  │   ├── DivingSave  (approach → block → hold)
+  │   └── QuickClear  (stand → find ball → kick)
+  │
+  └── [IF shot_detected=false] ← Normal goalie play
+      ├── GoalieDecide → {find, retreat, chase, adjust, kick}
+      ├── ImprovedGoaliePosition (trajectory-aware)
+      ├── Chase / Adjust / Kick (as usual)
+```
+
+### Testing the Goalie
+
+**Test 1: Basic shot detection**
+```
+1. Enable the goalie (player_role: goal_keeper)
+2. Roll/kick a ball toward the goal at moderate speed
+3. Watch the console for "SHOT DETECTED!" message
+4. The goalie should crabWalk toward intercept + squat block
+5. After the save, goalie should stand and clear the ball
+```
+
+**Test 2: Fast shot reaction**
+```
+1. Kick ball hard toward corner of the goal
+2. ShotDetector should predict intercept point before ball arrives
+3. Goalie should lateral crabWalk to intercept point
+4. Goalie should execute directional squat block
+5. Check: does the block happen BEFORE the ball arrives?
+   - If too slow: decrease velocity_threshold (triggers earlier)
+   - If too jerky: increase reaction_time_window
+```
+
+**Test 3: Center shot**
+```
+1. Kick ball directly at the goalie (center of goal)
+2. Shot direction should be "center"
+3. Goalie should squat block without lateral movement
+4. Goalie should hold until ball is past, then quick clear
+```
+
+### Tuning Tips
+
+| Symptom | Parameter to adjust | Direction |
+|---|---|---|
+| Goalie doesn't react to shots | `shot.velocity_threshold` | Lower (e.g., 0.2) |
+| Goalie dives for everything (false positives) | `shot.velocity_threshold` | Raise (e.g., 0.5) |
+| Goalie arrives too late to save | `save.crab_speed` | Raise (e.g., 1.5) |
+| Goalie overshoots intercept point | `save.crab_speed` | Lower (e.g., 0.6) |
+| Squat block doesn't last long enough | `save.block_hold_msecs` | Raise (e.g., 2500) |
+| Clearance kick is too weak | `clear.clear_power` | Raise (e.g., 8.0) |
+| Goalie stands in wrong place during normal play | `position.enable_trajectory_predict` | Try false to use old linear projection |
+
+### Disabling the New Goalie
+
+To revert to the old goalie behavior:
+1. Set `strategy.goalie.shot.enable: false`
+2. Replace `subtree_goal_keeper_play.xml` with the v1.2.4 version
+3. Rebuild
+
+---
+
 # Patch v1.2.2 — Tutorial: Using New Features
 
 ## Enabling Features

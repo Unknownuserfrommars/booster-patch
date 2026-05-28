@@ -99,6 +99,29 @@ brain_node:
         enable_role_switch: true 
         ball_control_cost_threshold: 5.0 
 
+    # ── v1.3 Goalie Overhaul ──
+    goalie:
+      # Shot detection
+      shot:
+        enable: true
+        velocity_threshold: 0.3          # m/s toward own goal
+        reaction_time_window: 1.5        # seconds of prediction ahead
+      
+      # Save execution
+      save:
+        squat_block_msecs: 500.0         # how long squat block takes
+        block_hold_msecs: 1500.0         # hold block position for up to this long
+        crab_speed: 1.0                  # lateral dive speed (m/s)
+      
+      # Recovery / clear
+      clear:
+        enable_quick_clear: true         # kick ball immediately after save
+        clear_power: 6.0                 # power for clearance kick
+
+      # Positioning
+      position:
+        enable_trajectory_predict: true  # use ball velocity for positioning
+
     obstacle_avoidance:
       depth_sample_step: 16 
       obstacle_min_height: 0.3 

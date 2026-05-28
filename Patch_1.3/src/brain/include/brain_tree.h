@@ -361,6 +361,90 @@ private:
     bool stepDecelerate();
 };
 
+// ───────────────── v1.3 Goalie Overhaul ─────────────────
+
+// Continuously monitors ball state for incoming shots.
+// Sets blackboard flags: shot_detected, shot_direction, shot_intercept_y
+class ShotDetector : public SyncActionNode
+{
+public:
+    ShotDetector(const string &name, const NodeConfig &config, Brain *_brain) : SyncActionNode(name, config), brain(_brain) {}
+    static PortsList providedPorts() {
+        return {
+            OutputPort<bool>("shot_detected"),
+            OutputPort<string>("shot_direction"),
+            OutputPort<double>("shot_intercept_y"),
+            OutputPort<double>("shot_time_to_impact"),
+        };
+    }
+    NodeStatus tick() override;
+private:
+    Brain *brain;
+    void computeBallVelocity(double &vx, double &vy);
+    rclcpp::Time _lastBallTime;
+    double _lastBallX = 0.0, _lastBallY = 0.0;
+    bool _hasLastBall = false;
+};
+
+// Executes a diving save: approach (crabWalk) → block (squatBlock) → hold
+class DivingSave : public StatefulActionNode
+{
+public:
+    DivingSave(const string &name, const NodeConfig &config, Brain *_brain) : StatefulActionNode(name, config), brain(_brain) {}
+    static PortsList providedPorts() {
+        return {
+            InputPort<string>("direction"),
+            InputPort<double>("intercept_y", 0.0, ""),
+            InputPort<double>("time_to_impact", 1.0, ""),
+        };
+    }
+    NodeStatus onStart() override;
+    NodeStatus onRunning() override;
+    void onHalted() override;
+private:
+    Brain *brain;
+    string _direction;
+    double _interceptY;
+    double _timeToImpact;
+    string _phase;  // "approach", "block", "hold"
+    rclcpp::Time _phaseStartTime;
+};
+
+// After a save: stand up, find ball, kick to sideline
+class QuickClear : public StatefulActionNode
+{
+public:
+    QuickClear(const string &name, const NodeConfig &config, Brain *_brain) : StatefulActionNode(name, config), brain(_brain) {}
+    static PortsList providedPorts() { return {}; }
+    NodeStatus onStart() override;
+    NodeStatus onRunning() override;
+    void onHalted() override;
+private:
+    Brain *brain;
+    rclcpp::Time _startTime;
+    bool _hasKicked = false;
+};
+
+// Velocity-aware goalie positioning (replaces linear projection)
+class ImprovedGoaliePosition : public SyncActionNode
+{
+public:
+    ImprovedGoaliePosition(const string &name, const NodeConfig &config, Brain *_brain) : SyncActionNode(name, config), brain(_brain) {}
+    static PortsList providedPorts() {
+        return {
+            InputPort<double>("dist_tolerance", 0.3, ""),
+            InputPort<double>("theta_tolerance", 0.2, ""),
+            InputPort<double>("vx_limit", 0.5, ""),
+            InputPort<double>("vy_limit", 0.5, ""),
+            InputPort<double>("dist_to_goalline", 1.0, ""),
+        };
+    }
+    NodeStatus tick() override;
+private:
+    Brain *brain;
+    double calcTrajectoryY();
+};
+
 class Intercept : public StatefulActionNode
 {
 public:
