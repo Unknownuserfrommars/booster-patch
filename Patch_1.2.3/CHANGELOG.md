@@ -1,4 +1,11 @@
-# Patch v1.2.2 — CHANGELOG
+# Patch v1.2.3 - CHANGELOG
+
+## v1.2.3 - Build Fix (CRLF Corruption) (2026-05-28)
+
+**Fix:** Fixed brain_tree.cpp CRLF corruption that broke macro definitions.
+Replaced 3728 double-CR with single CRLF. No code changes from v1.2.2.
+
+# Patch v1.2.3 — CHANGELOG
 
 ## v1.2.2 — Code Cleanup & Defense Restructure (2026-05-28)
 
