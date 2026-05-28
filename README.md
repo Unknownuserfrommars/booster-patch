@@ -7,6 +7,7 @@ Original source: [BoosterRobotics/robocup_demo](https://github.com/BoosterRoboti
 This repository contains patched versions of the official robocup_demo with custom modifications for competition use. Not affiliated with Booster Robotics.
 
 ## Versions
+It is generally recommended to download the latest bugfix release for each `1.x` version series, meaning the version with the highest `y` in `1.x.y`, to minimize known bugs.
 
 | Version | Description | Download |
 |---|---|---|
