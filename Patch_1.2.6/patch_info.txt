@@ -1,0 +1,9 @@
+Original File: K1_5v5_Demo_1.5
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 1.2.6
+
+FIX: Wrapped StrikerFreekick BehaviorTree children in single Sequence (BT.CPP requires exactly 1 child).
+FIX: Removed broken Script node in subtree_striker_freekick.xml.
+FIX: Moved kickSubType=1 to C++ handleSpecialStates().
+FIX: Removed duplicate Kick sequence.
+FIX: Added try-catch error handling to main.cpp threads.
