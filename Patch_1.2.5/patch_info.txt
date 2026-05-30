@@ -1,0 +1,7 @@
+Original File: K1_5v5_Demo_1.5
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 1.2.5
+
+FIX: Removed broken Script node in subtree_striker_freekick.xml that caused SIGABRT crash.
+FIX: Moved kickSubType=1 to C++ handleSpecialStates().
+FIX: Removed duplicate Kick sequence in freekick XML.
