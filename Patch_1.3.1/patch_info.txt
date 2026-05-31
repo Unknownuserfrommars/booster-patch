@@ -1,0 +1,7 @@
+Original File: K1_5v5_Demo_1.5
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 1.3.1
+
+v1.3.1 FIX: Wrapped StrikerFreekick BehaviorTree children in single Sequence (BT.CPP requires exactly 1 child).
+v1.3.1 FIX: Added try-catch error handling to main.cpp threads.
+v1.3: Goalie overhaul — ShotDetector, DivingSave, QuickClear, ImprovedGoaliePosition.
