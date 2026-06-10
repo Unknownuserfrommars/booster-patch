@@ -15,7 +15,7 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v1.1 | Updated Quick Shot, Power Shot, Deflection Shot | [Patch_1.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.1/Patch_1.1.zip) | |
 | v1.2.6 | Updated Striker Defense & Bugfixes | [Patch_1.2.6.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.2.4/Patch_1.2.6.zip) | ⭐ |
 | v1.3.1 | Updated Goalie Algorithm & XML Bugfix | [Patch_1.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.3.1/Patch_1.3.1.zip) | ⭐ |
-| v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/Patch_2.0.zip) | ⭐ |
+| v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) | ⭐ |
 
 ## Notes
 
