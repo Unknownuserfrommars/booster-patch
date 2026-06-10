@@ -1,3 +1,24 @@
+# Patch v2.0 — CHANGELOG
+
+## v2.0 — Merged onto Booster v1.6 SDK (2026-06-10)
+
+### 🏭 Official v1.6 SDK Changes (from BoosterRobotics)
+- **RLVisionKick v1/v2**: `RLVisionKick.visual_kick_version` param (kV1/kV2), uses public `LocoApiId::kVisualKick`
+- **Camera topics unified**: `/boostercamera/head/rgb` and `/boostercamera/head/depth`
+- **New API**: `changeRobocupMode()` — switches to kSoccer mode + exits VisualKick
+- **robocupWalk() changed**: now only exits VisualKick, no longer changes gait
+- **Locator relaxed**: `min_marker_count` 5→4, `max_residual` 0.35→0.4
+
+### 🦀 Our Patches (v1.1 → v1.3.1, carried forward)
+- **v1.3 Goalie overhaul**: ShotDetector, DivingSave, QuickClear, ImprovedGoaliePosition
+- **v1.3.1 BT XML fix**: Wrapped StrikerFreekick BehaviorTree children in single Sequence
+- **v1.3.1 try-catch**: Error handling on all 3 main.cpp threads
+- **v1.2 Striker defense**: Steal/clear/defend, 5-state possession detection
+- **v1.1 Kicking**: Free-kick power shot, quick shot, deflection shot
+- **v1.2.4 Crash fix**: Removed broken Script node, duplicate Kick sequence
+
+---
+
 # Patch v1.3 — CHANGELOG
 
 ## v1.3 — Goalie Overhaul: Shot Detection & Diving Saves (2026-05-28)
