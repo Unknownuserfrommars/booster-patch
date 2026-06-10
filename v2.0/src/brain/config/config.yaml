@@ -1,0 +1,194 @@
+brain_node:
+  ros__parameters:
+    game:
+      team_id: 66 # consistant with GameControl
+      player_id: 3 # 1 | 2 | 3 | 4 | 5
+      field_type: "adult_size" # adult_size | kid_size | robo_league
+      player_role: "striker" # striker | goal_keeper
+      player_start_pos: "right" # right | left
+      treat_person_as_robot: false # 是否将人类视为机器人, 用于调试. !!!! 正式比赛时, 必须设置为 false !!!!
+      number_of_players: 5
+    
+    ball_predictor: 
+      step_interval: 100. 
+      step_cnt: 50 
+      linear_steps: 5 
+      linear_rsq_threshold: 0.98 
+      acceleration: -0.4 
+      
+    robot:
+      robot_height: 0.90 
+      odom_factor: 1.2 
+      vx_factor: 0.90 
+      yaw_offset: 0.0 
+      vx_limit: 1.8 
+      vy_limit: 0.8 
+      vtheta_limit: 2.5 
+
+    strategy:
+      ball_confidence_threshold: 30.0 
+      ball_confidence_decay_rate: 3.0 
+      enable_stable_kick: true 
+      ball_memory_timeout: 3.0 
+      tm_ball_dist_threshold: 1.5  
+      limit_near_ball_speed: true 
+      near_ball_speed_limit: 0.4 
+      near_ball_range: 2.0 
+      soft_kickoff: false 
+      soft_kickoff_speed: 0.3 
+      kick_range: 0.65 
+      kick_theta_range: 0.12 
+      abort_kick_when_ball_moved: true 
+      abort_kick_ball_move_threshold: 0.12 
+      abort_shoot_when_ball_moved: true  
+      limit_speed_near_border: false 
+      near_border_speed_limit: 0.5
+      near_border_dist_threshold: -1.0 
+      enable_bypass: false 
+      enable_shoot: true 
+      enable_directional_kick: true 
+      use_squat_block: true 
+      squat_block_msecs: 2000.0 
+      use_move_block: false 
+      move_block_msecs: 2000.0 
+      shoot:
+        threat_threshold: -2.0 
+        xmin: 0.3
+        xmax: 0.6
+        ymin: -0.15
+        ymax: 0.15
+
+      power_shoot:
+        enable: true 
+        use_for_kickoff: false 
+        xmin: 1.1 
+        xmax: 1.5 
+        ymin: -0.3 
+        ymax: 0.3 
+      
+      # --- Free-kick power shot (v1.1) ---
+      enable_freekick_powershot: true
+      freekick_powershot_power: 9.0
+      freekick_powershot_min_dist: 3.0
+
+      # --- Quick shot for multi-robot games (v1.1) ---
+      enable_quickshot: true
+      quickshot_max_range: 3.0
+
+      # --- Deflection shot (v1.1) ---
+      
+      # --- Striker defense (v1.1) ---
+      enable_striker_defense: true
+
+      possession_margin: 0.25
+      possession_hysteresis_secs: 0.3
+      attack_protection_dist: 0.5
+      defensive_risk_tolerance: 0.5
+      defensive_steal_range: 1.5
+      defensive_clear_power: 6.0
+      deflection_shot_weight: 0.0
+      deflection_power_boost: 2.5
+      enable_freekick_deflection: false
+
+      enable_auto_visual_kick: true
+      auto_visual_kick_enable_dist_min: 0.2
+      auto_visual_kick_enable_dist_max: 4.0
+      auto_visual_kick_enable_angle: 0.35
+      enable_auto_visual_defend: true 
+      cooperation:
+        enable_role_switch: true 
+        ball_control_cost_threshold: 5.0 
+
+    # ── v1.3 Goalie Overhaul ──
+    goalie:
+      # Shot detection
+      shot:
+        enable: true
+        velocity_threshold: 0.3          # m/s toward own goal
+        reaction_time_window: 1.5        # seconds of prediction ahead
+      
+      # Save execution
+      save:
+        squat_block_msecs: 500.0         # how long squat block takes
+        block_hold_msecs: 1500.0         # hold block position for up to this long
+        crab_speed: 1.0                  # lateral dive speed (m/s)
+      
+      # Recovery / clear
+      clear:
+        enable_quick_clear: true         # kick ball immediately after save
+        clear_power: 6.0                 # power for clearance kick
+
+      # Positioning
+      position:
+        enable_trajectory_predict: true  # use ball velocity for positioning
+
+    obstacle_avoidance:
+      depth_sample_step: 16 
+      obstacle_min_height: 0.3 
+      grid_size: 0.2 
+      max_x: 3.0 
+      max_y: 5.0 
+      exclusion_x: 0.4 
+      exclusion_y: 0.5 
+      ball_exclusion_radius: 0.0 
+      ball_exclusion_height: 0.3 
+      occupancy_threshold: 20 
+      collision_threshold: 0.3 
+      safe_distance: 1.0 
+      avoid_secs: 2.0 
+      enable_freekick_avoid: true 
+      freekick_start_placing_safe_distance: 0.5 
+      freekick_start_placing_avoid_secs: 1.5 
+      obstacle_memory_msecs: 500. 
+      avoid_during_kick: false 
+      kick_ao_safe_dist: 1.5 
+      kick_ao_use_shoot: false 
+      avoid_during_chase: true 
+      chase_ao_safe_dist: 1.5 
+      always_turn_left: false 
+
+    RLVisionKick:
+      visual_kick_version: kV2 # kV1 | kV2
+
+    locator:
+      min_marker_count: 4
+      max_residual: 0.4
+
+    enable_com: True  # 是否开启队友间通信，建议打开
+
+    rerunLog:
+      enable_tcp: false # 是否通过网络传输 log
+      server_ip: "192.168.10.110:9876" # 开启了 rerun Viewer 的机器地址
+      enable_file: false # 是否将 log 写入本地
+      log_dir: "/home/booster/Workspace/rrlog" # 本地 log 存储路径, 会在此路径下生成以时间为开头的文件
+      max_log_file_mins: 5.0 # 本地 log 最长多少分钟就分片存储. 太大的文件会导致读的时候死机.
+      img_interval: 1 #每多少帧图像 log 一次, 如果希望更好的实时性或减少日志大小, 可以调高这个值. 但会造成 log 的时间精度降低.
+    
+    recovery:
+      retry_max_count: 2
+
+    vision:
+      image_topic: "/boostercamera/head/rgb" #相机topic统一命名
+      depth_image_topic: "/boostercamera/head/depth" #相机topic统一命名
+      # image_topic: "/image_left_raw" # d-robotics
+      # depth_image_topic: "/image_left_raw/camera_info" # d-robotics
+      # cam_pixel_width: 544. # 相机像素宽度, d-robotics
+      # cam_pixel_height: 448. # 相机像素高度, d-robotics
+      cam_pixel_width: 1280. # 相机像素宽度 realsense
+      cam_pixel_height: 720. # 相机像素高度 realsense
+      cam_fov_x: 90.0 # 相机视场角, 单位: 度 realsense
+      cam_fov_y: 60.0 # 相机视场角, 单位: 度 realsense
+      # cam_fov_x: 69.4 # 相机视场角, 单位: 度, d-robotics
+      # cam_fov_y: 42.5 # 相机视场角, 单位: 度, d-robotics    
+
+    debug:
+      log_ball_pos: false # 是否记录球位置到 ballpos.log 中, 用于调试
+    
+    game_control_ip: "192.168.74.2"  # 更改为具体的裁判机的 IP 地址
+
+    # for fun
+    sound:
+      enable: true 
+      sound_pack: "espeak" 
+
+
