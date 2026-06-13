@@ -11,12 +11,16 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 
 | Version | Description | Download | Recommended? |
 |---|---|---|:-:|
-| v1.0 | Original patch by Kevin Zhou | [Patch_1.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.0/Patch_1.0.zip) | |
-| v1.1 | Updated Quick Shot, Power Shot, Deflection Shot | [Patch_1.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.1/Patch_1.1.zip) | |
-| v1.2.6 | Updated Striker Defense & Bugfixes | [Patch_1.2.6.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.2.4/Patch_1.2.6.zip) | ⭐ |
-| v1.3.1 | Updated Goalie Algorithm & XML Bugfix | [Patch_1.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.3.1/Patch_1.3.1.zip) |  |
-| v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) |  |
+| v1.0 | Original patch by Kevin Zhou | [Patch_1.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.0/Patch_1.0.zip) | No[1][3] |
+| v1.1 | Updated Quick Shot, Power Shot, Deflection Shot | [Patch_1.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.1/Patch_1.1.zip) | No[1][3] |
+| v1.2.6 | Updated Striker Defense & Bugfixes | [Patch_1.2.6.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.2.4/Patch_1.2.6.zip) | ⭐ [3] |
+| v1.3.1 | Updated Goalie Algorithm & XML Bugfix | [Patch_1.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.3.1/Patch_1.3.1.zip) | No[2][3] |
+| v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) | No[1] |
 | v2.1 | Experimental auto-calibration and fix compatibility issues of vision node | [Patch_2.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.1/v2.1.zip) | ⭐ |
+
+[1]: Contains bugs that are fixed in later releases.
+[2]: Very less test data provided. Can be unstable.
+[3]: This uses an outdated SDK version by BoosterRobotics.
 
 ## Notes
 
