@@ -1,0 +1,10 @@
+Original File: K1_5v5_Demo_v1.6
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 2.1
+
+v2.1: Auto Hand-Eye Calibration utility added to vision package.
+v2.0: Merged all v1.3.1 patches onto Booster's v1.6 SDK release.
+v1.6 base: RLVisionKick v1/v2 support, unified camera topics, kSoccer mode.
+v1.3.1 changes: Goalie overhaul (ShotDetector, DivingSave, QuickClear, ImprovedGoaliePosition).
+v1.2 changes: Striker defense system, possession detection, freekick/subtype fixes.
+v1.1 changes: Free-kick power shot, quick shot, deflection shot.
