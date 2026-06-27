@@ -17,7 +17,8 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v1.3.1 | Updated Goalie Algorithm & XML Bugfix | [Patch_1.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v1.3.1/Patch_1.3.1.zip) | No[2][3] |
 | v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) | No[1] |
 | v2.1 | Experimental auto-calibration and fix compatibility issues of vision node | [Patch_2.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.1/v2.1.zip) | No[1] |
-| v2.2 | Team signal CID communication system and defensive comms integration | [v2.2.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2/v2.2.zip) | ⭐ |
+| v2.2 | Team signal CID communication system and defensive comms integration | [v2.2.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2/v2.2.zip) | No[1] |
+| v2.2.1 | 3v3 two-on-one wall-pass tactic and targeted team-signal flow | [v2.2.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.1/v2.2.1.zip) | ⭐ |
 
 [1]: Contains bugs that are fixed in later releases.
 [2]: Very less test data provided. Can be unstable.
@@ -33,6 +34,6 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 ## Model Engines
 
 TensorRT model engines (.engine files) are **not included** in the source folder.
-They are available in the [engines/](engines/) directory reference or can be downloaded from the [release zip](https://github.com/Unknownuserfrommars/booster-patch/releases) as part of the `Patch_1.x.y.zip`. For v2 releases, they are under the `v2.x.zip` asset, such as `v2.2.zip`.
+They are available in the [engines/](engines/) directory reference or can be downloaded from the [release zip](https://github.com/Unknownuserfrommars/booster-patch/releases) as part of the `Patch_1.x.y.zip`. For v2 releases, they are under the `v2.x.zip` asset, such as `v2.2.1.zip`.
 
 To use: copy the .engine files from the release zip to the corresponding `Patch/src/vision/model/` before building.
