@@ -872,7 +872,9 @@ void Brain::handleReceivedTeamSignal(int cid, int senderId) {
 
         case TeamSignal::ABORT:
             resetTwoToOne();
-            tree->setEntry<int>("control_state", 1);
+            // P0 fix: 原来这里 setEntry("control_state", 1) 会把机器人切进"手柄/手动"分支,
+            // 而比赛中无手柄, control_state 永远回不到 3 —— 收到一次 ABORT 整场瘫痪.
+            // ABORT 的正确语义: 停一拍 + 释放战术/lead, 下一 tick 恢复正常自主比赛.
             client->setVelocity(0.0, 0.0, 0.0);
             data->tmImLead = false;
             tree->setEntry<bool>("is_lead", false);

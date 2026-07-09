@@ -28,7 +28,7 @@ brain_node:
     strategy:
       ball_confidence_threshold: 30.0 
       ball_confidence_decay_rate: 3.0 
-      enable_stable_kick: true 
+      enable_stable_kick: false # RACE: 关闭 1s 稳定期. 稳定(1s)+踢球(~1.8s) 会超出 2.5s 决策锁定窗口, 可能在踢球中途重新抖动; 关闭后整个踢球 ~1.8s, 稳在窗口内.
       ball_memory_timeout: 3.0 
       tm_ball_dist_threshold: 1.5  
       limit_near_ball_speed: true
@@ -93,7 +93,7 @@ brain_node:
       # RL/脚本分工 (band split): RL VisualKick 只在 [dist_min, dist_max] 区间接管"接近+踢球",
       # 球进入 kick_range 后由确定性的 Kick 节点负责临门一脚. 配合 stall 交接与重入冷却,
       # 即使固件版本"只追不踢", 也会在球停在脚下 stall_ms 后退出 RL, 由脚本踢球兜底.
-      enable_auto_visual_kick: true
+      enable_auto_visual_kick: false # RACE: 关闭. 本机固件的 VisualKick 是否真会物理出脚从未验证, 比赛无热身无干预, 不赌. 赛后想验证再改回 true.
       auto_visual_kick_enable_dist_min: 1.2 # RL 介入的最近距离; 代码内还强制 >= kick_range*1.2
       auto_visual_kick_enable_dist_max: 4.0
       auto_visual_kick_enable_angle: 0.35
@@ -112,7 +112,7 @@ brain_node:
         ball_control_cost_threshold: 5.0
 
       two_to_one:
-        enabled: true # Enable conservative 3v3 two-pass wall-pass tactic
+        enabled: false # RACE: 关闭. 该战术从未上场验证, 无热身情况下不引入 7 秒双机编排的方差; 修好的基础 kick 管线是更稳的得分路径. 想启用改回 true.
         execution_distance_threshold: 5.0 # Only call tactic when exactly one opponent is in this scan/corridor range
         forward_corridor_width: 2.0 # Width of the ball-to-goal corridor used to count dangerous opponents
         support_flank_x_offset: 0.8 # Receiver target is this far beyond the defender toward opponent goal

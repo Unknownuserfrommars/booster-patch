@@ -169,7 +169,10 @@ bool isTwoToOneAbortNeeded(Brain *brain) {
 
 void abortTwoToOneTactic(Brain *brain, const string &reason) {
     if (brain->data->twoToOneRole != TwoToOneRole::INACTIVE) {
-        brain->sendTeamSignal(TeamSignal::ABORT, true);
+        // P0 fix: 原来广播 ABORT (全队紧急停止) —— 对"取消一次配合"来说是过大的杀伤半径,
+        // 且旧的 ABORT 接收端会把队友永久切进手动模式. 改发 WALL_PASS_COMPLETE,
+        // 接收端只会释放自己的 wall-pass 状态并恢复正常比赛.
+        brain->sendTeamSignal(TeamSignal::WALL_PASS_COMPLETE, true);
         brain->log->setTimeNow();
         brain->log->log("debug/two_to_one/abort", rerun::TextLog(reason));
     }
