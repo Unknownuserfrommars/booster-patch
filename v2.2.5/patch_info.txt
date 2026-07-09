@@ -1,0 +1,16 @@
+Original File: K1_5v5_Demo_v1.6
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 2.2.5
+
+v2.2.5: CRITICAL fix: ABORT team signal permanently disabled receiving robots (latent since v2.2); race-day config profile (RL kick / wall-pass / stable-kick off); pre-race review hardening.
+v2.2.4: Deployment-script fixes (assist tree, install path + backup, systemd unit) and manual hand-eye calibration fixes (vision model install OPTIONAL, intrin topic, start_calibration.sh guards).
+v2.2.3: Kick pipeline fixes (hesitation + kick direction), RL VisualKick band-split hand-off (re-enabled), GlanceAtGoal pre-shot aim check.
+v2.2.2: GameController fail-stop guardrails, SET hard-stop safety, v2.2.1 build macro fix, and auto_calib.sh packaging.
+v2.2.1: Conservative 3v3 two-on-one wall-pass tactic with targeted CID sync and abort safety.
+v2.2: Team signal CID communication system and defensive comms integration.
+v2.1: Auto Hand-Eye Calibration utility added to vision package.
+v2.0: Merged all v1.3.1 patches onto Booster's v1.6 SDK release.
+v1.6 base: RLVisionKick v1/v2 support, unified camera topics, kSoccer mode.
+v1.3.1 changes: Goalie overhaul (ShotDetector, DivingSave, QuickClear, ImprovedGoaliePosition).
+v1.2 changes: Striker defense system, possession detection, freekick/subtype fixes.
+v1.1 changes: Free-kick power shot, quick shot, deflection shot.

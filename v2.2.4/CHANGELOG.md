@@ -1,28 +1,5 @@
 # Patch v2.2.4 — CHANGELOG
 
-## v2.2.4 race hardening — pre-race audit (2026-07-10)
-
-### CRITICAL: ABORT signal permanently disabled receiving robots (latent since v2.2)
-- `handleReceivedTeamSignal`'s `ABORT` case set `control_state = 1` — the gamepad/manual branch of `game.xml`.
-  With no gamepad allowed mid-match, a robot that received one ABORT stood idle for the rest of the match
-  (only LT+B or a restart recovers). Removed; ABORT now stops for one tick, releases tactic/lead, and resumes
-  autonomous play.
-- `abortTwoToOneTactic` broadcast that `ABORT` on every wall-pass abort (setup timeout, stale comms, extra
-  corridor opponent). Now sends `WALL_PASS_COMPLETE`, which only releases the partner's wall-pass state.
-
-### Race config profile (no-warmup, no-intervention match; all reversible in config.yaml)
-- `enable_auto_visual_kick: false` — whether this firmware's VisualKick physically kicks was never verified;
-  not gambling without a warmup. The fixed scripted kick pipeline carries the match.
-- `two_to_one.enabled: false` — never field-verified; avoids 7s two-robot choreography variance.
-- `enable_stable_kick: false` — the 1s stabilize plus ~1.8s kick exceeds the 2.5s decision-commit window and
-  could reintroduce mid-kick flapping; without it the kick finishes in ~1.8s, safely inside.
-
-### Review hardening
-- `GlanceAtGoal` early-exit (goal outside head range) now zeroes velocity.
-- `Kick::onRunning` obstacle-avoid branch: min-speed amplification disabled (matches onStart fix).
-
----
-
 ## v2.2.4 — Deployment + Manual Calibration Fixes (2026-07-09)
 
 ### Deployment (merged from Codex's "fixed-for-robot" package)
