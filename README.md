@@ -18,7 +18,8 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) | No[1] |
 | v2.1 | Experimental auto-calibration and fix compatibility issues of vision node | [Patch_2.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.1/v2.1.zip) | No[1] |
 | v2.2.2 | Team signal communication system + 3v3 tactics design + Bugfix | [v2.2.2.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.2/v2.2.2.zip) | No[1] |
-| v2.2.3 | Kick pipeline fixes (hesitation + direction) + RL VisualKick band-split hand-off + GlanceAtGoal pre-shot aim check | [v2.2.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.3/v2.2.3.zip) | ⭐ |
+| v2.2.3 | Kick pipeline fixes (hesitation + direction) + RL VisualKick band-split hand-off + GlanceAtGoal pre-shot aim check | [v2.2.3.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.3/v2.2.3.zip) | No[1] |
+| v2.2.4 | Deployment-script fixes + manual hand-eye calibration fixes | [v2.2.4.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.4/v2.2.4.zip) | ⭐ |
 
 [1]: Outdated Version. May contain bugs or have less features.
 [2]: Very less test data provided. Can be unstable.
