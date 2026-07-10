@@ -1,5 +1,23 @@
 # Patch v2.2.5 — CHANGELOG
 
+## v2.2.5 hotfix — vision_node startup crash after calibration (2026-07-10)
+
+- `vision_node` terminated with `YAML::TypedBadConversion<string>` at startup when the merged
+  `/opt/booster/vision.yaml` lacked `camera.type` — the read was unguarded. Now falls back to
+  `realsense` via `as_or` (same fix as the robot-verified K1_5v5_Demo_v1.6_fixed reference);
+  `detection_model.classnames` similarly guarded with the default class list.
+- Root cause of the broken system config: `start_calibration.sh` unconditionally copied
+  `/tmp/vision.yaml` over `/opt/booster/vision.yaml`. When the calibration node saves to
+  `/opt/booster` directly, a stale/partial leftover `/tmp/vision.yaml` clobbered the good config.
+  The copy now only happens if `/tmp/vision.yaml` was freshly written by this run, and the script
+  verifies `/opt/booster/vision.yaml` contains `camera.type` + `detection_model` afterwards,
+  auto-repairing from the package config (with a `.broken-<timestamp>` backup) if not.
+- On-robot recovery without rebuilding: restore a complete config over `/opt/booster/vision.yaml`
+  (newest `~/Workspace/calibration_log/handeye/*/vision_local.yaml.calbration_res_*` keeps today's
+  calibration; otherwise the package `src/vision/config/vision.yaml`).
+
+---
+
 ## v2.2.5 — CRITICAL ABORT Fix + Race Config + Review Hardening (2026-07-10)
 
 ### CRITICAL: ABORT signal permanently disabled receiving robots (latent since v2.2)

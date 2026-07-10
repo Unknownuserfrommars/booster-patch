@@ -111,8 +111,10 @@ void VisionNode::Init(const std::string &cfg_template_path, const std::string &c
     } else {
         if(camera_type_.empty())
         {
-            std::cout << "camera type not overridden by launch file, using default: " << node["camera"]["type"].as<std::string>() << std::endl;
-            camera_type_ = node["camera"]["type"].as<std::string>();
+            // 配置缺失 camera.type 时回退 realsense, 避免 YAML::TypedBadConversion 直接 terminate
+            // (K1_5v5_Demo_v1.6_fixed 参考版同款修复; /opt/booster/vision.yaml 损坏/不完整时曾致 vision_node 起不来)
+            camera_type_ = as_or<std::string>(node["camera"]["type"], "realsense");
+            std::cout << "camera type not overridden by launch file, using default: " << camera_type_ << std::endl;
         }
         intr_ = Intrinsics(node["camera"]["intrin"]);
         p_eye2head_ = as_or<Pose>(node["camera"]["extrin"], Pose());
@@ -130,7 +132,9 @@ void VisionNode::Init(const std::string &cfg_template_path, const std::string &c
         return;
     } else {
         detector_ = YoloV8Detector::CreateYoloV8Detector(node["detection_model"], detection_model_path);
-        classnames_ = node["detection_model"]["classnames"].as<std::vector<std::string>>();
+        // classnames 缺失时回退默认列表, 避免不完整配置直接 terminate
+        classnames_ = as_or<std::vector<std::string>>(node["detection_model"]["classnames"],
+            {"Ball", "Goalpost", "Person", "LCross", "TCross", "XCross", "PenaltyPoint", "Opponent", "BRMarker"});
         // detector post processing
         float default_threshold = as_or<float>(node["detection_model"]["confidence_threshold"], 0.2);
         if (node["detection_model"]["post_process"]) {
