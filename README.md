@@ -18,7 +18,8 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v2.0 | Update patch to the v1.6 SDK | [Patch_2.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.0/v2.0.zip) | No[1] |
 | v2.1 | Experimental auto-calibration and fix compatibility issues of vision node | [Patch_2.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.1/v2.1.zip) | No[1] 
 | v2.2.5 | Team signal system + CRITICAL BUGFIXES + Polish Structure | [v2.2.5.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.5/v2.2.5.zip) | No[1] |
-| v2.2.6 | v2.2.5 + tournament anti-interference compliance (kill_booster_server.sh wired into start.sh) | [v2.2.6.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.6/v2.2.6.zip) | ⭐ |
+| v2.2.6 | v2.2.5 + tournament anti-interference compliance (kill_booster_server.sh wired into start.sh) | [v2.2.6.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.6/v2.2.6.zip) | No[1] |
+| v2.2.7 | v2.2.6 + Rerun .rrd post-match logging on by default | [v2.2.7.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.7/v2.2.7.zip) | ⭐ |
 
 [1]: Outdated Version. May contain bugs or have less features.
 [2]: Very less test data provided. Can be unstable.

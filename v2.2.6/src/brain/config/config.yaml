@@ -240,13 +240,13 @@ brain_node:
 
     enable_com: True  # 是否开启队友间通信，建议打开
 
-    rerunLog: # 用法见 rerun.docx: 实时看用 enable_tcp(有线连电脑, 先开 rerun Viewer 再 start.sh); 赛后复盘用 enable_file(.rrd 文件)
-      enable_tcp: false # 比赛拔网线无法实时看, 保持 false; 赛前调试/标定验证时可改 true
-      server_ip: "192.168.10.110:9876" # 开启了 rerun Viewer 的电脑 IP (改成你电脑的有线 IP, 端口保持 9876)
-      enable_file: true # RACE: 开启. 比赛全程无法观测, .rrd 是唯一的赛后复盘手段; 文件在 log_dir, 用 rerun Viewer 打开
+    rerunLog:
+      enable_tcp: false # 是否通过网络传输 log
+      server_ip: "192.168.10.110:9876" # 开启了 rerun Viewer 的机器地址
+      enable_file: false # 是否将 log 写入本地
       log_dir: "/home/booster/Workspace/rrlog" # 本地 log 存储路径, 会在此路径下生成以时间为开头的文件
       max_log_file_mins: 5.0 # 本地 log 最长多少分钟就分片存储. 太大的文件会导致读的时候死机.
-      img_interval: 10 # RACE: 1 -> 10 (约3fps图像). 每帧都存会持续 JPEG 编码+大文件, 比赛日省 CPU/磁盘; 想要更细的图像回放再调低.
+      img_interval: 1 #每多少帧图像 log 一次, 如果希望更好的实时性或减少日志大小, 可以调高这个值. 但会造成 log 的时间精度降低.
     
     recovery:
       retry_max_count: 2
