@@ -1,5 +1,16 @@
 # Patch v2.2.6 — CHANGELOG
 
+## v2.2.6 addendum — Rerun logging enabled for post-match review (2026-07-11)
+
+Per the team's rerun.docx usage guide. Matches are unobservable live (ethernet unplugged), so `.rrd`
+file logging is now the default: `rerunLog.enable_file: true`, with `img_interval` 1 → 10 (~3fps
+image logging) to protect match-day CPU/disk. Files land in `/home/booster/Workspace/rrlog`, split
+every 5 minutes; open them afterwards with the Rerun Viewer (viewer version must match the robot's
+rerun_sdk version). `enable_tcp` stays `false` — flip it plus `server_ip` (your PC's wired IP) for
+live viewing during pre-match testing/calibration only. Config-only change, no rebuild needed.
+
+---
+
 ## v2.2.6 — Tournament Anti-Interference Rules Compliance (2026-07-10)
 
 Per the organizer's rules update (upd.docx, 避免外部连接干扰比赛-解决方案). Referees pull system logs;
