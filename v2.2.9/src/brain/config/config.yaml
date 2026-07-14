@@ -1,0 +1,276 @@
+brain_node:
+  ros__parameters:
+    game:
+      team_id: 66 # consistant with GameControl
+      player_id: 3 # 1 | 2 | 3 | 4 | 5
+      field_type: "adult_size" # adult_size | kid_size | robo_league
+      player_role: "striker" # striker | goal_keeper
+      player_start_pos: "right" # right | left
+      treat_person_as_robot: false # 是否将人类视为机器人, 用于调试. !!!! 正式比赛时, 必须设置为 false !!!!
+      number_of_players: 3
+    
+    ball_predictor: 
+      step_interval: 100. 
+      step_cnt: 50 
+      linear_steps: 5 
+      linear_rsq_threshold: 0.98 
+      acceleration: -0.4 
+      
+    robot:
+      robot_height: 0.90 
+      odom_factor: 1.2 
+      vx_factor: 0.90 
+      yaw_offset: 0.0 
+      vx_limit: 1.8 
+      vy_limit: 0.8 
+      vtheta_limit: 2.5 
+
+    strategy:
+      ball_confidence_threshold: 30.0 
+      ball_confidence_decay_rate: 3.0 
+      enable_stable_kick: false # RACE: 关闭 1s 稳定期. 稳定(1s)+踢球(~1.8s) 会超出 2.5s 决策锁定窗口, 可能在踢球中途重新抖动; 关闭后整个踢球 ~1.8s, 稳在窗口内.
+      ball_memory_timeout: 3.0 
+      tm_ball_dist_threshold: 1.5  
+      limit_near_ball_speed: true
+      near_ball_speed_limit: 0.6 # v2.2.9: 回退 1.0 -> 0.6. 1.0 时冲到球前还在高速移动就出脚, 导致射门方向偏 (bug: 射门方向不对). 0.6 让机器人到球前先稳住再踢, 方向更准.
+      near_ball_range: 2.0 
+      soft_kickoff: true # 开球/发球时用小力量轻推 (Kick 节点在 isKickingOff/isFreekickKickingOff 期间改用 soft_kickoff_speed), 球走更短距离, 便于控球不失球
+      soft_kickoff_speed: 0.3 # 开球穿球速度 (m/s). 正常踢是 0.9~1.2, 这里 0.3 是轻推. 注: setVelocity 有 0.3 最小速度地板, 再调低也基本还是 ~0.3; 想更短请缩短接触时间(见下方说明), 不是调这个
+      kick_range: 0.75
+      kick_theta_range: 0.35
+      abort_kick_when_ball_moved: true
+      abort_kick_ball_move_threshold: 0.25
+      abort_shoot_when_ball_moved: true  
+      limit_speed_near_border: false 
+      near_border_speed_limit: 0.5
+      near_border_dist_threshold: -1.0 
+      enable_bypass: false 
+      enable_shoot: true 
+      enable_directional_kick: true 
+      use_squat_block: true 
+      squat_block_msecs: 2000.0 
+      use_move_block: false 
+      move_block_msecs: 2000.0 
+      shoot:
+        threat_threshold: -2.0 
+        xmin: 0.3
+        xmax: 0.6
+        ymin: -0.15
+        ymax: 0.15
+
+      power_shoot:
+        enable: true 
+        use_for_kickoff: false 
+        xmin: 1.1 
+        xmax: 1.5 
+        ymin: -0.3 
+        ymax: 0.3 
+      
+      # --- Free-kick power shot (v1.1) ---
+      enable_freekick_powershot: true
+      freekick_powershot_power: 9.0
+      freekick_powershot_min_dist: 3.0
+
+      # --- Quick shot for multi-robot games (v1.1) ---
+      enable_quickshot: true
+      quickshot_max_range: 3.0
+
+      # --- Deflection shot (v1.1) ---
+      
+      # --- Striker defense (v1.1) ---
+      enable_striker_defense: true
+
+      possession_margin: 0.25
+      possession_hysteresis_secs: 0.3
+      attack_protection_dist: 0.5
+      defensive_risk_tolerance: 0.5
+      defensive_steal_range: 1.5
+      defensive_clear_power: 6.0
+      deflection_shot_weight: 0.0
+      deflection_power_boost: 2.5
+      enable_freekick_deflection: false
+
+      # RL/脚本分工 (band split): RL VisualKick 只在 [dist_min, dist_max] 区间接管"接近+踢球",
+      # 球进入 kick_range 后由确定性的 Kick 节点负责临门一脚. 配合 stall 交接与重入冷却,
+      # 即使固件版本"只追不踢", 也会在球停在脚下 stall_ms 后退出 RL, 由脚本踢球兜底.
+      enable_auto_visual_kick: false # RACE: 关闭. 本机固件的 VisualKick 是否真会物理出脚从未验证, 比赛无热身无干预, 不赌. 赛后想验证再改回 true.
+      auto_visual_kick_enable_dist_min: 1.2 # RL 介入的最近距离; 代码内还强制 >= kick_range*1.2
+      auto_visual_kick_enable_dist_max: 4.0
+      auto_visual_kick_enable_angle: 0.35
+      auto_visual_kick_handoff_range: 0.85 # 球进入此距离后开始 stall 计时
+      auto_visual_kick_stall_ms: 2500 # 球在脚下基本没动超过此时长 -> 退出 RL 交给脚本 Kick
+      auto_visual_kick_reentry_cooldown_ms: 4000 # 退出 RL 后至少隔这么久才允许再次进入
+      enable_auto_visual_defend: true
+      glance_at_goal:
+        enable: false # v2.2.9: 关闭. glance 会让机器人临门前原地冻结 0.6~0.9s 并把头转离球, 实战是净损失(易丢球/被抢), 且门柱常常没真看到就白等. 瞄准靠正常定位+追球时的门柱识别即可.
+        msecs: 600 # 观察持续时间 (ms)
+        max_aim_age_ms: 4000 # 门柱观测或成功重定位在此时间内视为"瞄准信息新鲜", 无需 glance
+        cooldown_ms: 5000 # 两次 glance 的最小间隔, 防止反复观察拖慢进攻
+
+      cooperation:
+        enable_role_switch: true
+        ball_control_cost_threshold: 5.0
+
+      two_to_one:
+        enabled: false # RACE: 关闭. 该战术从未上场验证, 无热身情况下不引入 7 秒双机编排的方差; 修好的基础 kick 管线是更稳的得分路径. 想启用改回 true.
+        execution_distance_threshold: 5.0 # Only call tactic when exactly one opponent is in this scan/corridor range
+        forward_corridor_width: 2.0 # Width of the ball-to-goal corridor used to count dangerous opponents
+        support_flank_x_offset: 0.8 # Receiver target is this far beyond the defender toward opponent goal
+        support_flank_y_offset: 1.2 # Receiver target is this far to the safer/wider side
+        runner_x_offset: 1.4 # Original carrier run target beyond defender after first pass
+        runner_y_offset: 0.45 # Original carrier run target lateral offset toward same wall-pass lane
+        ready_radius: 0.55 # Position tolerance for overlapper/runner readiness
+        receive_ball_range: 1.0 # Receiver considers the ball playable within this range
+        max_setup_time_ms: 2500 # Abort if overlapper is not ready quickly enough
+        max_total_time_ms: 7000 # Abort if the whole wall-pass takes too long
+        comm_timeout_ms: 1400 # Abort if the tactic partner's comms get stale
+        first_pass_kick_ms: 900 # Keep first-pass Kick node active for at least this long
+        return_pass_kick_ms: 900 # Keep return-pass Kick node active for at least this long
+        min_ball_confidence: 30.0 # Abort/avoid tactic below this ball confidence
+        abort_extra_opponents: true # Abort if a second opponent enters the forward corridor
+      
+      team_signals:
+        enabled: true # Master switch for decimal CID team signals
+        cooldown_ms: 1500 # Minimum interval before repeating the same CID
+        ttl_ms: 2500 # How long received tactical signal state stays active
+        tendency:
+          cid_0000: 0.0 # NONE: no command
+          cid_1000: 1.0 # TAKE_LEAD: I control the ball now
+          cid_1100: 0.7 # HOLD_LEAD: I still control the ball
+          cid_1200: 1.0 # RELEASE_LEAD: I gave up/lost ball control
+          cid_1300: 0.0 # REQUEST_BALL: alias of PASS_TO_ME for now, not sent automatically
+          cid_2000: 0.4 # PASS_TO_ME: I am open / want the ball
+          cid_2100: 0.5 # PASS_TO_PLAYER + PID: target player should receive
+          cid_2200: 1.0 # DOING_PASS + PID: I am passing to target player
+          cid_2300: 0.4 # DOING_CROSS: cross incoming, attackers move goalward
+          cid_2400: 0.0 # ASSIST_READY: not implemented without trained zones
+          cid_2500: 0.0 # THROUGH_BALL + PID: not implemented yet
+          cid_2600: 1.0 # WALL_PASS_START + PID: carrier calls one teammate into 2-on-1 overlap
+          cid_2700: 1.0 # WALL_PASS_READY + PID: overlapper tells carrier the first-pass lane is ready
+          cid_2800: 1.0 # WALL_PASS_RUN_READY + PID: original carrier is beyond defender for return pass
+          cid_2900: 1.0 # WALL_PASS_COMPLETE: release/finish wall-pass tactic state
+          cid_3000: 0.8 # DANGER + LVL: danger level 0-9, simple levels only
+          cid_3100: 0.0 # OPPONENT_IN_ZONE: not implemented without zones
+          cid_3200: 0.0 # COVER_PLAYER: not implemented yet
+          cid_3300: 0.0 # COVER_ZONE: not implemented without zones
+          cid_3400: 0.5 # PRESS: closest robot presses/chases
+          cid_3401: 0.9 # FALL_BACK: retreat into defensive behavior
+          cid_3500: 0.0 # BLOCK_SHOT: not implemented
+          cid_3600: 0.7 # CLEAR: clear the ball using clearance kick
+          cid_4000: 0.0 # FREEKICK_SETUP: not implemented
+          cid_4100: 0.0 # FREEKICK_EXECUTE: not implemented
+          cid_4200: 0.0 # CORNER_PLAY: not implemented
+          cid_4300: 0.0 # KICKOFF_PLAY: not implemented
+          cid_5000: 0.0 # FORMATION: not implemented
+          cid_5100: 0.0 # MOVE_TO_ROLE_ZONE: not implemented without zones
+          cid_5200: 0.2 # SPREAD: record wide-spacing hint
+          cid_5201: 0.2 # COMPACT: record compact-spacing hint
+          cid_5300: 0.0 # PUSH_UP: not implemented
+          cid_5400: 0.3 # HOLD_POSITION: hold/avoid advancing
+          cid_6000: 0.8 # BALL_LOST: sender lost ball
+          cid_6001: 0.8 # BALL_FOUND: sender reacquired ball
+          cid_6100: 0.8 # STUCK: sender is stuck
+          cid_6101: 0.8 # UNSTUCK: sender is free again
+          cid_6200: 1.0 # FALLEN: sender fell
+          cid_6201: 1.0 # RECOVERED: sender got up
+          cid_6300: 0.0 # GOAL_SCORED: not implemented, GameController owns score
+          cid_6301: 0.0 # GOAL_CONCEDED: not implemented, GameController owns score
+          cid_7000: 0.0 # SWITCH_GOALIE + PID: not implemented, legacy 10+PID still works
+          cid_7100: 0.0 # SWITCH_STRIKER + PID: not implemented
+          cid_7200: 0.0 # NEED_SUBSTITUTE: not implemented
+          cid_8000: 1.0 # ABORT: stop current action and enter cancel state
+          cid_8100: 1.0 # BALL_GOING_IN: emergency defensive retreat/save hint
+          cid_8200: 0.9 # BREAKAWAY: opponent breakaway, retreat
+          cid_8300: 0.0 # COLLISION + DIR: not implemented without direction semantics
+
+    # ── v1.3 Goalie Overhaul ──
+    goalie:
+      # Shot detection
+      shot:
+        enable: true
+        velocity_threshold: 0.3          # m/s toward own goal
+        reaction_time_window: 1.5        # seconds of prediction ahead
+      
+      # Save execution
+      save:
+        squat_block_msecs: 500.0         # how long squat block takes
+        block_hold_msecs: 1500.0         # hold block position for up to this long
+        crab_speed: 1.0                  # lateral dive speed (m/s)
+      
+      # Recovery / clear
+      clear:
+        enable_quick_clear: true         # kick ball immediately after save
+        clear_power: 6.0                 # power for clearance kick
+
+      # Positioning
+      position:
+        enable_trajectory_predict: true  # use ball velocity for positioning
+
+    obstacle_avoidance:
+      depth_sample_step: 16 
+      obstacle_min_height: 0.3 
+      grid_size: 0.2 
+      max_x: 3.0 
+      max_y: 5.0 
+      exclusion_x: 0.4 
+      exclusion_y: 0.5 
+      ball_exclusion_radius: 0.0 
+      ball_exclusion_height: 0.3 
+      occupancy_threshold: 20 
+      collision_threshold: 0.3 
+      safe_distance: 1.0 
+      avoid_secs: 2.0 
+      enable_freekick_avoid: true 
+      freekick_start_placing_safe_distance: 0.5 
+      freekick_start_placing_avoid_secs: 1.5 
+      obstacle_memory_msecs: 500. 
+      avoid_during_kick: false 
+      kick_ao_safe_dist: 1.5 
+      kick_ao_use_shoot: false 
+      avoid_during_chase: true
+      chase_ao_safe_dist: 1.0 # v2.2.9: 1.5 -> 1.0. 追球时避障在 1.5m 内就触发(降速 0.5 侧绕), 加上深度误检, 常导致"追球中途卡顿". 收紧到 1.0 只在很近时避障, 减少中途卡顿. (想更激进可设 avoid_during_chase:false, 但有撞对手/摔倒风险)
+      always_turn_left: false 
+
+    RLVisionKick:
+      visual_kick_version: kV2 # kV1 | kV2
+
+    locator:
+      min_marker_count: 4
+      max_residual: 0.4
+
+    enable_com: True  # 是否开启队友间通信，建议打开
+
+    rerunLog: # 用法见 rerun.docx: 实时看用 enable_tcp(有线连电脑, 先开 rerun Viewer 再 start.sh); 赛后复盘用 enable_file(.rrd 文件)
+      enable_tcp: false # 比赛拔网线无法实时看, 保持 false; 赛前调试/标定验证时可改 true
+      server_ip: "192.168.10.110:9876" # 开启了 rerun Viewer 的电脑 IP (改成你电脑的有线 IP, 端口保持 9876)
+      enable_file: true # RACE: 开启. 比赛全程无法观测, .rrd 是唯一的赛后复盘手段; 文件在 log_dir, 用 rerun Viewer 打开
+      log_dir: "/home/booster/Workspace/rrlog" # 本地 log 存储路径, 会在此路径下生成以时间为开头的文件
+      max_log_file_mins: 5.0 # 本地 log 最长多少分钟就分片存储. 太大的文件会导致读的时候死机.
+      img_interval: 10 # RACE: 1 -> 10 (约3fps图像). 每帧都存会持续 JPEG 编码+大文件, 比赛日省 CPU/磁盘; 想要更细的图像回放再调低.
+    
+    recovery:
+      retry_max_count: 2
+
+    vision:
+      image_topic: "/boostercamera/head/rgb" #相机topic统一命名
+      depth_image_topic: "/boostercamera/head/depth" #相机topic统一命名
+      # image_topic: "/image_left_raw" # d-robotics
+      # depth_image_topic: "/image_left_raw/camera_info" # d-robotics
+      # cam_pixel_width: 544. # 相机像素宽度, d-robotics
+      # cam_pixel_height: 448. # 相机像素高度, d-robotics
+      cam_pixel_width: 1280. # 相机像素宽度 realsense
+      cam_pixel_height: 720. # 相机像素高度 realsense
+      cam_fov_x: 90.0 # 相机视场角, 单位: 度 realsense
+      cam_fov_y: 60.0 # 相机视场角, 单位: 度 realsense
+      # cam_fov_x: 69.4 # 相机视场角, 单位: 度, d-robotics
+      # cam_fov_y: 42.5 # 相机视场角, 单位: 度, d-robotics    
+
+    debug:
+      log_ball_pos: false # 是否记录球位置到 ballpos.log 中, 用于调试
+    
+    game_control_ip: "192.168.74.2"  # 更改为具体的裁判机的 IP 地址
+
+    # for fun
+    sound:
+      enable: true 
+      sound_pack: "espeak" 
