@@ -110,6 +110,7 @@ Brain::Brain() : rclcpp::Node("brain_node")
     declare_parameter<bool>("strategy.enable_stable_kick", false);
     declare_parameter<double>("strategy.ball_memory_timeout", 3.0);
     declare_parameter<double>("strategy.ball_lost_msecs", 1000.0);
+    declare_parameter<double>("strategy.kick_abort_ball_lost_msecs", 2000.0);
     declare_parameter<double>("strategy.tm_ball_dist_threshold", 3.0);
     declare_parameter<bool>("strategy.limit_near_ball_speed", true);
     declare_parameter<double>("strategy.near_ball_speed_limit", 0.3);

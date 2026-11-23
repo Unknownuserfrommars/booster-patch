@@ -1,0 +1,5 @@
+Original File: K1_5v5_demo_1.7
+Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
+Patch version: 3.0
+
+v3.0: Rebased on Booster K1_5v5_demo_1.7 (firmware 1.7+). Striker fixes for "spins/orbits before kicking" and "approaches the ball too fast": near-ball speed limit on (0.5 m/s within 2 m), brain ball confidence 60->45, tighter vertical head tracking, back up instead of spinning when the ball is lost at the feet, kick-decision hysteresis, kick abort ball-lost timeout 1000->2000 ms (configurable). v2.x patches (built on demo 1.6) are NOT carried over yet.

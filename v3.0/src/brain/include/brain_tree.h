@@ -205,6 +205,9 @@ public:
     void onHalted() override;
 private:
     double _turnDir = 1.0;
+    // v3.0: 球最后出现在脚边正前方时, 先后退一小段让球回到视野, 再考虑原地转身。
+    bool _backUpFirst = false;
+    rclcpp::Time _startTime{0, 0, RCL_ROS_TIME};
     Brain *brain;
 };
 

@@ -330,7 +330,8 @@ NodeStatus CamTrackBall::tick()
 {
     double pitch, yaw, ballX, ballY, deltaX, deltaY;
     const double pixToleranceX = brain->config->camPixX * 3 / 10.; // 球距离视野中心的像素差小于这个容差, 则认为在视野中心了.
-    const double pixToleranceY = brain->config->camPixY * 3 / 10.;
+    // v3.0: 3/10 -> 2/10. 贴球时球在画面底部, 30% 的死区会让球直接掉出视野, 头还没来得及低下去。
+    const double pixToleranceY = brain->config->camPixY * 2 / 10.;
     const double xCenter = brain->config->camPixX / 2;
     const double yCenter = brain->config->camPixY / 2; // 用下视野 2/3（不符）位置来追踪球, 以获得更多的场上信息.
 
@@ -1634,6 +1635,18 @@ NodeStatus StrikerDecide::tick() {
         deltaDir * lastDeltaDir <= 0 &&
         fabs(deltaDir) < M_PI / 6;
     reachedKickDir = reachedKickDir || fabs(deltaDir) < 0.1;
+    // v3.0: 踢球决策加迟滞(参考 B-Human: 一旦决定踢就锁住, 除非明显变差)。
+    // 没有迟滞时, 踢球途中某一帧角度/检测抖一下就退回 adjust, Kick 节点被打断, 机器人重新绕球。
+    const bool wasKicking =
+        lastDecision == "kick" || lastDecision == "power_kick" ||
+        lastDecision == "cross" || lastDecision == "safe_shoot";
+    const double KICK_DIR_KEEP = 0.45;     // rad, 已在踢球时允许的方向误差
+    const double KICK_THETA_KEEP = 0.4;    // rad, 已在踢球时允许的球相对朝向
+    const double BALL_RECENT_MSECS = 700;  // ms, 贴球时球掉出视野, 最近看到过也算
+    if (wasKicking) reachedKickDir = reachedKickDir || fabs(deltaDir) < KICK_DIR_KEEP;
+    const double kickThetaRange = wasKicking ? max(KICK_THETA_RANGE, KICK_THETA_KEEP) : KICK_THETA_RANGE;
+    const bool ballSeenRecently = brain->data->ballDetected ||
+        brain->msecsSince(brain->data->ball.timePoint) < BALL_RECENT_MSECS;
     timeLastTick = now;
     lastDeltaDir = deltaDir;
     hasLastDeltaDir = true;
@@ -1703,8 +1716,8 @@ NodeStatus StrikerDecide::tick() {
             || reachedKickDir
         )
         && !avoidKick
-        && brain->data->ballDetected
-        && fabs(brain->data->ball.yawToRobot) < KICK_THETA_RANGE
+        && ballSeenRecently
+        && fabs(brain->data->ball.yawToRobot) < kickThetaRange
         && ball.range < KICK_RANGE
     )
     {
@@ -2083,7 +2096,9 @@ NodeStatus Kick::onRunning()
     double KICK_RANGE = 1.0;
     brain->get_parameter("strategy.kick_range", KICK_RANGE);
 
-    const double BALL_LOST_THRESHOLD = 1000;  // ms
+    // v3.0: 原来写死 1000ms。贴球时球在脚下, 1 秒没检测到很正常, 会中止踢球 -> 回到 adjust 再绕一圈。
+    double BALL_LOST_THRESHOLD = 2000;  // ms
+    brain->get_parameter("strategy.kick_abort_ball_lost_msecs", BALL_LOST_THRESHOLD);
     if (ballRange > KICK_RANGE){
         log("ball too far, abort kick");
         return NodeStatus::SUCCESS;
@@ -2584,6 +2599,16 @@ NodeStatus RobotFindBall::onStart()
     }
     _turnDir = brain->data->ball.yawToRobot > 0 ? 1.0 : -1.0;
 
+    // v3.0 (参考 B-Human BallLostProvider 的思路): 球是在脚边正前方丢的, 它基本就还在那里,
+    // 只是低于相机视野。这时原地转一圈是在背对球找球。先后退一小段, 让球回到画面里。
+    const double BACK_UP_IF_BALL_WITHIN = 0.6;  // m, 记忆中球距离小于此值
+    const double BACK_UP_IF_BALL_YAW_WITHIN = 1.0;  // rad, 且大致在正前方
+    _backUpFirst =
+        std::isfinite(brain->data->ball.range) &&
+        brain->data->ball.range < BACK_UP_IF_BALL_WITHIN &&
+        fabs(brain->data->ball.yawToRobot) < BACK_UP_IF_BALL_YAW_WITHIN;
+    _startTime = brain->get_clock()->now();
+
     return NodeStatus::RUNNING;
 }
 
@@ -2604,15 +2629,16 @@ NodeStatus RobotFindBall::onRunning()
     double vyawLimit;
     getInput("vyaw_limit", vyawLimit);
 
-    double vx = 0;
-    double vy = 0;
-    double vtheta = 0;
-    if (brain->data->ball.range < 0.3)
-    { // 记忆中的球位置太近了, 后退一点
-      // vx = cap(-brain->data->ball.posToRobot.x, 0.2, -0.2);
-      // vy = cap(-brain->data->ball.posToRobot.y, 0.2, -0.2);
+    // v3.0: 先后退约 1.2s (robot_client 的最小速度会把 -0.2 抬到 -0.3, 约退 0.35m), 再原地转身。
+    const double BACK_UP_MSECS = 1200;
+    const double BACK_UP_VX = -0.2;
+    if (_backUpFirst && brain->msecsSince(_startTime) < BACK_UP_MSECS)
+    {
+        log("ball lost at feet, backing up before turning");
+        brain->client->setVelocity(BACK_UP_VX, 0, 0);
+        return NodeStatus::RUNNING;
     }
-    // vtheta = _turnDir > 0 ? vyawLimit : -vyawLimit;
+
     brain->client->setVelocity(0, 0, vyawLimit * _turnDir);
     return NodeStatus::RUNNING;
 }

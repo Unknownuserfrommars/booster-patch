@@ -25,15 +25,20 @@ brain_node:
       vtheta_limit: 1.5 
 
     strategy:
-      ball_confidence_threshold: 60.0 
-      ball_confidence_decay_rate: 3.0 
-      enable_stable_kick: false 
-      ball_memory_timeout: 3.0 
+      # v3.0: 60 -> 45. vision 已经按 Ball 0.4 过滤过一次(发给 brain 的是 0.4*100=40 以上的球),
+      # brain 这里再卡 60 会把近距离被脚挡住、置信度只有 40~60 的球全部丢掉 -> 丢球 -> 原地转圈找球。
+      ball_confidence_threshold: 45.0
+      ball_confidence_decay_rate: 3.0
+      enable_stable_kick: false
+      ball_memory_timeout: 3.0
       ball_lost_msecs: 1000.0
-      tm_ball_dist_threshold: 1.5  
-      limit_near_ball_speed: false 
-      near_ball_speed_limit: 0.6 
-      near_ball_range: 2.0 
+      # v3.0 新增: Kick 节点"疑似丢球"中止踢球的时间。原来写死 1000ms, 贴球时正常的检测空档就会中止踢球。
+      kick_abort_ball_lost_msecs: 2000.0
+      tm_ball_dist_threshold: 1.5
+      # v3.0: false -> true, 0.6 -> 0.5。Chase 原来一路 1.6m/s 冲到离球 1m 才切 Adjust, 太快。
+      limit_near_ball_speed: true
+      near_ball_speed_limit: 0.5
+      near_ball_range: 2.0
       soft_kickoff: true          # 所有开球(比赛开球/任意球/角球/门球)均用软速度，降低出界/失误风险
       soft_kickoff_speed: 0.3
       kick_range: 1.0 
