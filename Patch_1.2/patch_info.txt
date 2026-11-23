@@ -1,3 +1,0 @@
-Original File: K1_5v5_Demo_1.5
-Patched by: Kevin Zhou, aka Unknownuserfrommars, Kev1511, Tianzzi
-Patch version: 1.2

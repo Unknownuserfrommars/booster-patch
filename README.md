@@ -22,6 +22,7 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v2.2.7 | v2.2.6 + Rerun .rrd post-match logging on by default | [v2.2.7.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.7/v2.2.7.zip) | No[1] |
 | v2.2.8 | v2.2.7 + chase at robot max speed (fixes mid-chase stalling) + soft/short kick-off | [v2.2.8.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.8/v2.2.8.zip) | No[1] |
 | v2.2.9 | v2.2.8 field-regression fixes: chase speed dialed back (stops-chasing fix), off-target shot fix, GlanceAtGoal disabled | [v2.2.9.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.9/v2.2.9.zip) | ⭐ |
+| v3.0 | Rebased on Booster K1_5v5_demo_1.7 (firmware 1.7+) + striker fixes: no spinning before the kick, slower ball approach. v2.x features not ported yet | [v3.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v3.0/v3.0.zip) | Testing[2] |
 
 [1]: Outdated Version. May contain bugs or have less features.
 [2]: Very less test data provided. Can be unstable.
@@ -33,10 +34,12 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 - For the original unmodified source, visit [BoosterRobotics/robocup_demo](https://github.com/BoosterRobotics/robocup_demo).
 - NOTE: The original source may be updated & modified at any time. The v1.x series uses the demo which can be found [here](https://github.com/dycnnnb/robot).
 - The v2.x series uses the demo which can be found [here](https://github.com/dycnnnb/robot/tree/2).
+- The v3.x series uses Booster's official `K1_5v5_demo_1.7` and needs robot firmware 1.7 or newer.
+- Branch `v3` (default) only holds `v3.0/`. The source folders for v1.x and v2.x are on the [`main`](https://github.com/Unknownuserfrommars/booster-patch/tree/main) branch.
 
 ## Model Engines
 
 TensorRT model engines (.engine files) are **not included** in the source folder.
-They are available in the [engines/](engines/) directory reference or can be downloaded from the [release zip](https://github.com/Unknownuserfrommars/booster-patch/releases) as part of the `Patch_1.x.y.zip`. For v2 releases, they are under the `v2.x.zip` asset, such as `v2.2.2.zip`.
+They are available in the [engines/](engines/) directory reference or can be downloaded from the [release zip](https://github.com/Unknownuserfrommars/booster-patch/releases) as part of the `Patch_1.x.y.zip`. For v2 releases, they are under the `v2.x.zip` asset, such as `v2.2.2.zip`. For v3 releases, `v3.0.zip` already has them in `v3.0/src/vision/model/`.
 
 To use: copy the .engine files from the release zip to the corresponding `Patch/src/vision/model/` before building.
