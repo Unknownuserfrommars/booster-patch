@@ -23,6 +23,7 @@ It is generally recommended to download the latest bugfix release for each `1.x`
 | v2.2.8 | v2.2.7 + chase at robot max speed (fixes mid-chase stalling) + soft/short kick-off | [v2.2.8.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.8/v2.2.8.zip) | No[1] |
 | v2.2.9 | v2.2.8 field-regression fixes: chase speed dialed back (stops-chasing fix), off-target shot fix, GlanceAtGoal disabled | [v2.2.9.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v2.2.9/v2.2.9.zip) | ⭐ |
 | v3.0 | Rebased on Booster K1_5v5_demo_1.7 (firmware 1.7+) + striker fixes: no spinning before the kick, slower ball approach. v2.x features not ported yet | [v3.0.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v3.0/v3.0.zip) | Testing[2] |
+| v3.1 | v3.0 + goalie/striker coordination in our box (striker covers the far post instead of colliding with the goalie) + ryc's near-post goalie depth | [v3.1.zip](https://github.com/Unknownuserfrommars/booster-patch/releases/download/v3.1/v3.1.zip) | Testing[2] |
 
 [1]: Outdated Version. May contain bugs or have less features.
 [2]: Very less test data provided. Can be unstable.
